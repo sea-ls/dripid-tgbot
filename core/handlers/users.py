@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
@@ -6,7 +8,11 @@ from core.keyboards import inline
 from core.utils import callbackdata, google_api, dict_data
 import config
 from core.utils.state import StateUser
+import time
 
+logging.basicConfig(filename="test.log",
+                    filemode='a',
+                    level=logging.INFO)
 
 async def get_start(msg: Message | CallbackQuery, state: FSMContext):
     await state.clear()
@@ -21,7 +27,37 @@ async def get_start(msg: Message | CallbackQuery, state: FSMContext):
     reply = inline.start_menu()
     await msg.answer(text=message, reply_markup=reply)
 
+async def mailing(msg: Message , bot: Bot):
+    user_id = msg.from_user.id
+    if user_id == 243106987:  # Тут id того, кому можно выполнять команду рассылки
+        await start_mailing(bot)
 
+def get_users_list():
+    with open('users.txt', 'r') as f:
+        return f.readlines()
+
+async def start_mailing(bot: Bot):  # Функция рассылки
+    print(len(get_users_list()))
+    for i in get_users_list():
+        try:
+            time.sleep(1)
+            text = '''
+            🥰Доброго дня, мы не с очень приятными новостями: 
+
+Наш канал, который находился по адресу https://t.me/drip_id0 был удален (с чем это связано не знаем, поддержка нам ничего не отвечает уже более 12 часов)
+
+Пока мы решаем эту проблему, чтобы оставаться на связи в случае не благоприятного исхода, просим вас подписаться на https://t.me/dripid_service
+
+Заранее очень благодарны🥶'''
+            await bot.send_message(chat_id=i,
+                                   text=text)
+            logging.info('Отправлено пользователю - ' + i)
+            print('Отправлено пользователю - ' + i)
+        except Exception as e:
+            logging.error('НЕ Отправлено пользователю - ' + i)
+            logging.error(e)
+            print('НЕ Отправлено пользователю - ' + i)
+            print(e)
 async def calculate_cost_order(call: CallbackQuery):
     message = f'⏱ В течении какого времени необходимо выкупить ваш заказ?\n' \
               f'Более подробно разобраться в выборе способа вам поможет <a href="https://t.me/Drip_ID0/552">этот пост</a>'
