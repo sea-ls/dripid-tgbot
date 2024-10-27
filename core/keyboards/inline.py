@@ -11,7 +11,7 @@ def start_menu():
     builder.button(text='📦 Как сделать заказ?', url=config.URL_ORDER)
     builder.button(text='💲 Как оплатить криптовалютой?', url=config.URL_PAYMENT)
     builder.button(text='✏ Отзывы', url=config.URL_REVIEWS)
-    builder.button(text='👩‍ <200d>💻 Связь с менеджером', url=config.URL_MANAGER)
+    builder.button(text='👩‍💻  Связь с менеджером', url=config.URL_MANAGER)
     builder.button(text='🖥 Рассчитать стоимость заказа', callback_data='calculate_cost_order')
 
     return builder.adjust(1).as_markup()
@@ -64,7 +64,8 @@ def get_manager():
     builder = InlineKeyboardBuilder()
 
 #Могло перенестись криво
-    builder.button(text='👩 <200d>💻  Связь с менеджером', url=config.URL_MANAGER)
+
+    builder.button(text='👩‍💻  Связь с менеджером', url=config.URL_MANAGER)
     builder.button(text='🔙 Главное меню', callback_data='start_menu')
 
     return builder.adjust(1).as_markup()
