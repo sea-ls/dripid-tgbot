@@ -3,16 +3,26 @@ import logging
 from aiogram import Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
+import requests
+
 
 from core.keyboards import inline
+from core.keyboards.inline import questions
 from core.utils import callbackdata, google_api, dict_data
 import config
-from core.utils.state import StateUser
+from core.utils.state import StateUser, OrderTracking
 import time
 
 logging.basicConfig(filename="test.log",
                     filemode='a',
                     level=logging.INFO)
+
+async def unknown_command(message: Message):
+    if message.text.startswith('/'):
+        await message.answer("Извините, я не знаю такой команды. Попробуйте /help для списка доступных команд.")
+    else:
+        await message.answer("Я вас не понял. Напишите /help, чтобы узнать, что я умею.")
+
 
 async def get_start(msg: Message | CallbackQuery, state: FSMContext):
     await state.clear()
@@ -26,6 +36,12 @@ async def get_start(msg: Message | CallbackQuery, state: FSMContext):
               f'💵 Рассчитайте примерную стоимость вашего заказа и окунитесь в мир возможностей.'
     reply = inline.start_menu()
     await msg.answer(text=message, reply_markup=reply)
+
+async def get_order_status(msg: Message, state: FSMContext):
+    message = f'Напишите ваш трек номер!'
+    reply = inline.start_menu_return()
+    await msg.answer(text=message, reply_markup = reply)
+    await state.set_state(OrderTracking.waiting_for_tracking_number)
 
 async def mailing(msg: Message , bot: Bot):
     user_id = msg.from_user.id
@@ -58,12 +74,6 @@ async def start_mailing(bot: Bot):  # Функция рассылки
             logging.error(e)
             print('НЕ Отправлено пользователю - ' + i)
             print(e)
-async def calculate_cost_order(call: CallbackQuery):
-    message = f'⏱ В течении какого времени необходимо выкупить ваш заказ?\n' \
-              f'Более подробно разобраться в выборе способа вам поможет <a href="https://t.me/Drip_ID0/552">этот пост</a>'
-    reply = inline.order_fulfillment()
-    await call.message.edit_text(text=message, reply_markup=reply, disable_web_page_preview=True)
-
 
 async def select_product_category(call: CallbackQuery, callback_data: callbackdata.StepOne):
     message = f'Выберите категорию товара:'
@@ -234,3 +244,48 @@ async def enter_price_product(msg: Message, state: FSMContext, bot: Bot):
     # price_per - цена доставки за 1 кг
     # commission - комиссия
     # money - цена товара
+
+async def get_faq(msg: CallbackQuery):
+    message = f'Часто задаваемые вопросы:'
+    reply = inline.faq_fulfillment()
+    await msg.message.edit_text(text=message, reply_markup=reply, disable_web_page_preview=True)
+
+# Универсальный обработчик для всех вопросов
+async def process_question(msg: CallbackQuery):
+    question_text = msg.data
+    reply = inline.faq_menu_return()
+    answer = questions.get(question_text, "Извините, ответ на этот вопрос не найден.")
+    await msg.message.edit_text(text=answer, reply_markup=reply, disable_web_page_preview=True)
+
+
+async def calculate_cost_order(msg: Message | CallbackQuery):
+    message = f'⏱ В течении какого времени необходимо выкупить ваш заказ?\n' \
+              f'Более подробно разобраться в выборе способа вам поможет <a href="https://t.me/Drip_ID0/552">этот пост</a>'
+    if isinstance(msg, CallbackQuery):
+        reply = inline.order_fulfillment()
+        await msg.message.edit_text(text=message, reply_markup=reply, disable_web_page_preview=True)
+    if isinstance(msg, Message):
+        reply = inline.order_fulfillment()
+        await msg.answer(text=message, reply_markup=reply, disable_web_page_preview=True)
+
+
+async def handle_tracking_number(msg: Message, state: FSMContext):
+    tracking_number = msg.text
+    text = get_person_tracking("http://dripid-dev.sea-ls.ru", tracking_number)
+    await msg.answer(f"Статус вашего заказа: {text}")
+    await state.finish()
+
+
+def get_person_tracking(base_url: str, tracking_number: str):
+    endpoint = f"{base_url}/api/delivery-service/person/tracking"
+    params = {"trackNumber": tracking_number}
+
+    try:
+        response = requests.get(endpoint, params=params)
+        if response.status_code == 404:
+            return f"Заказа с трекномером \"{tracking_number}\" нет"
+        response.raise_for_status()
+        return response.json().get('orderStatus')
+    except requests.RequestException as e:
+        print(f"Не удалось получить заказ: {e}")
+        return f"Не удалось получить заказ"
