@@ -272,14 +272,24 @@ async def calculate_cost_order(msg: Message | CallbackQuery):
 async def handle_tracking_number(msg: Message, state: FSMContext):
     tracking_number = msg.text
     text = get_person_tracking("https://dripid-dev.sea-ls.ru", tracking_number)
-    await msg.answer(f"Статус вашего заказа: {text}")
+    statuses = {
+        "DELIVERY": "Доставка",
+        "REDEMPTION": "Выкуп",
+        "PROCESSING": "В обработке",
+        "PAID": "Оплачен",
+        "WAREHOUSE_USA": "На складе в США",
+        "SHIPPED_RUSSIA": "Отправлен в Россию",
+        "REDEEMED": "Отменён",
+        "DELIVERED": "Доставлено"
+    }
+    status = statuses.get(text, "Неизвестный статус")
+    await msg.answer(f"Статус вашего заказа: {status}")
     await state.finish()
 
 
 def get_person_tracking(base_url: str, tracking_number: str):
     endpoint = f"{base_url}/api/delivery-service/person/tracking"
     params = {"trackNumber": tracking_number}
-
     try:
         response = requests.get(endpoint, params=params)
         if response.status_code == 404:
