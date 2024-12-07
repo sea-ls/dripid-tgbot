@@ -271,7 +271,7 @@ async def calculate_cost_order(msg: Message | CallbackQuery):
 
 async def handle_tracking_number(msg: Message, state: FSMContext):
     tracking_number = msg.text
-    text = get_person_tracking("http://dripid-dev.sea-ls.ru", tracking_number)
+    text = get_person_tracking("https://dripid-dev.sea-ls.ru", tracking_number)
     await msg.answer(f"Статус вашего заказа: {text}")
     await state.finish()
 
