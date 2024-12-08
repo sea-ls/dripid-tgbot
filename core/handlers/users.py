@@ -282,7 +282,7 @@ async def handle_tracking_number(msg: Message, state: FSMContext):
         "REDEEMED": "Отменён",
         "DELIVERED": "Доставлено"
     }
-    status = statuses.get(text, "Неизвестный статус")
+    status = statuses.get(text, "Заказ не найден")
     await msg.answer(f"Статус вашего заказа: {status}")
     await state.finish()
 
