@@ -23,22 +23,22 @@ async def unknown_command(message: Message):
 async def get_start(msg: Message | CallbackQuery, state: FSMContext):
     await state.clear()
     first_name = msg.from_user.first_name
-    if isinstance(msg, CallbackQuery):
-        msg = msg.message
-        await msg.delete()
-
+    reply = inline.start_menu()
     message = f'👋 Добро пожаловать, уважаемый(ая) <b>{first_name}!</b>\n\n' \
               f'👍 Ваше путешествие в мир зарубежного шоппинга начинается здесь.\n' \
               f'💵 Рассчитайте примерную стоимость вашего заказа и окунитесь в мир возможностей.'
-    reply = inline.start_menu()
-    await msg.answer(text=message, reply_markup=reply)
+
+    if isinstance(msg, CallbackQuery):
+        await msg.message.edit_text(text=message, reply_markup=reply, disable_web_page_preview=True)
+    elif isinstance(msg, Message):
+        await msg.answer(text=message, reply_markup = reply)
 
 async def get_order_status(msg: Message | CallbackQuery, state: FSMContext):
     message = f'Напишите ваш трек номер!'
     reply = inline.start_menu_return()
     if isinstance(msg, CallbackQuery):
         await msg.message.edit_text(text=message, reply_markup=reply, disable_web_page_preview=True)
-    if isinstance(msg, Message):
+    elif isinstance(msg, Message):
         await msg.answer(text=message, reply_markup = reply)
     await state.set_state(OrderTracking.waiting_for_tracking_number)
 
@@ -263,7 +263,7 @@ async def calculate_cost_order(msg: Message | CallbackQuery):
     reply = inline.order_fulfillment()
     if isinstance(msg, CallbackQuery):
         await msg.message.edit_text(text=message, reply_markup=reply, disable_web_page_preview=True)
-    if isinstance(msg, Message):
+    elif isinstance(msg, Message):
         await msg.answer(text=message, reply_markup=reply, disable_web_page_preview=True)
 
 
