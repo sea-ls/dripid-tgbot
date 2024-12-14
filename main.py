@@ -13,7 +13,7 @@ from core.utils import callbackdata
 from core.utils.state import StateUser, OrderTracking
 
 commands = [
-        BotCommand(command='menu', description='Вызваь Меню'),
+        BotCommand(command='menu', description='Вызвать Меню'),
         BotCommand(command='calculate_cost_order', description='Рассчитать стоимость заказа'),
         BotCommand(command='get_order_status', description='Узнать статус заказа')
     ]

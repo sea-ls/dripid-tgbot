@@ -13,10 +13,6 @@ import config
 from core.utils.state import StateUser, OrderTracking
 import time
 
-logging.basicConfig(filename="test.log",
-                    filemode='a',
-                    level=logging.INFO)
-
 async def unknown_command(message: Message):
     if message.text.startswith('/'):
         await message.answer("Извините, я не знаю такой команды. Попробуйте /help для списка доступных команд.")
