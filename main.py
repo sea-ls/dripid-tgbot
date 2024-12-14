@@ -13,10 +13,8 @@ from core.utils import callbackdata
 from core.utils.state import StateUser, OrderTracking
 
 commands = [
-        BotCommand(command='menu', description='Вызвать Меню'),
-        BotCommand(command='calculate_cost_order', description='Рассчитать стоимость заказа'),
-        BotCommand(command='get_order_status', description='Узнать статус заказа')
-    ]
+        BotCommand(command='menu', description='Вызвать Меню')
+]
 
 async def start():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
@@ -31,6 +29,7 @@ async def start():
 
     dp.callback_query.register(users.process_question, lambda c: c.data in questions)
     dp.callback_query.register(users.get_start, F.data == 'start_menu')
+    dp.callback_query.register(users.get_order_status, F.data == 'get_order_status')
     dp.callback_query.register(users.get_faq, F.data == 'get_faq')
     dp.callback_query.register(users.calculate_cost_order, F.data == 'calculate_cost_order')
     dp.callback_query.register(users.select_product_category, callbackdata.StepOne.filter())

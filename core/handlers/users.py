@@ -33,10 +33,13 @@ async def get_start(msg: Message | CallbackQuery, state: FSMContext):
     reply = inline.start_menu()
     await msg.answer(text=message, reply_markup=reply)
 
-async def get_order_status(msg: Message, state: FSMContext):
+async def get_order_status(msg: Message | CallbackQuery, state: FSMContext):
     message = f'Напишите ваш трек номер!'
     reply = inline.start_menu_return()
-    await msg.answer(text=message, reply_markup = reply)
+    if isinstance(msg, CallbackQuery):
+        await msg.message.edit_text(text=message, reply_markup=reply, disable_web_page_preview=True)
+    if isinstance(msg, Message):
+        await msg.answer(text=message, reply_markup = reply)
     await state.set_state(OrderTracking.waiting_for_tracking_number)
 
 async def mailing(msg: Message , bot: Bot):
@@ -242,7 +245,7 @@ async def enter_price_product(msg: Message, state: FSMContext, bot: Bot):
     # money - цена товара
 
 async def get_faq(msg: CallbackQuery):
-    message = f'Часто задаваемые вопросы:'
+    message = f'Популярные вопросы:'
     reply = inline.faq_fulfillment()
     await msg.message.edit_text(text=message, reply_markup=reply, disable_web_page_preview=True)
 
@@ -257,17 +260,17 @@ async def process_question(msg: CallbackQuery):
 async def calculate_cost_order(msg: Message | CallbackQuery):
     message = f'⏱ В течении какого времени необходимо выкупить ваш заказ?\n' \
               f'Более подробно разобраться в выборе способа вам поможет <a href="https://t.me/Drip_ID0/552">этот пост</a>'
+    reply = inline.order_fulfillment()
     if isinstance(msg, CallbackQuery):
-        reply = inline.order_fulfillment()
         await msg.message.edit_text(text=message, reply_markup=reply, disable_web_page_preview=True)
     if isinstance(msg, Message):
-        reply = inline.order_fulfillment()
         await msg.answer(text=message, reply_markup=reply, disable_web_page_preview=True)
 
 
 async def handle_tracking_number(msg: Message, state: FSMContext):
     tracking_number = msg.text
     text = get_person_tracking("https://dripid-dev.sea-ls.ru", tracking_number)
+    reply = inline.start_menu_return()
     statuses = {
         "DELIVERY": "Доставка",
         "REDEMPTION": "Выкуп",
@@ -279,8 +282,7 @@ async def handle_tracking_number(msg: Message, state: FSMContext):
         "DELIVERED": "Доставлено"
     }
     status = statuses.get(text, "Заказ не найден")
-    await msg.answer(f"Статус вашего заказа: {status}")
-    await state.finish()
+    await msg.answer(text=f"Статус вашего заказа: {status}", reply_markup=reply)
 
 
 def get_person_tracking(base_url: str, tracking_number: str):
@@ -293,5 +295,5 @@ def get_person_tracking(base_url: str, tracking_number: str):
         response.raise_for_status()
         return response.json().get('orderStatus')
     except requests.RequestException as e:
-        print(f"Не удалось получить заказ: {e}")
+        print(f"Не удалось получить заказ: {tracking_number}")
         return f"Не удалось получить заказ"
