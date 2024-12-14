@@ -254,7 +254,7 @@ async def process_question(msg: CallbackQuery):
     question_text = msg.data
     reply = inline.faq_menu_return()
     answer = questions.get(question_text, "Извините, ответ на этот вопрос не найден.")
-    await msg.message.edit_text(text=answer, reply_markup=reply, disable_web_page_preview=True)
+    await msg.message.edit_text(text=answer, reply_markup=reply, parse_mode="MarkdownV2", disable_web_page_preview=True)
 
 
 async def calculate_cost_order(msg: Message | CallbackQuery):
