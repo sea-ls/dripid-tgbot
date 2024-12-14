@@ -15,9 +15,9 @@ services:
         #    delay: 10s
         #
         environment:
-            BOT_TOKEN: tgbot-bot-token
-            API_KEY: tgbot-api-key
-            TABLE_ID: tgbot-table_id
+            BOT_TOKEN: /run/secrets/tgbot-bot-token
+            API_KEY: /run/secrets/tgbot-api-key
+            TABLE_ID: /run/secrets/tgbot-table_id
         secrets:
             - tgbot-bot-token
             - tgbot-api-key
