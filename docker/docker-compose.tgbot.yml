@@ -14,10 +14,27 @@ services:
         #    condition: any
         #    delay: 10s
         #
+        environment:
+            BOT_TOKEN: tgbot-bot-token
+            API_KEY: tgbot-api-key
+            TABLE_ID: tgbot-table_id
+        secrets:
+            - tgbot-bot-token
+            - tgbot-api-key
+            - tgbot-table_id
         logging:
             driver: 'json-file'
             options:
                 max-size: '10m'
+
+secrets:
+    tgbot-bot-token:
+        external: true
+    tgbot-api-key:
+        external: true
+    tgbot-table_id:
+        external: true
+
 networks:
     default:
         name: dripid-network
