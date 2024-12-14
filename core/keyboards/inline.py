@@ -3,13 +3,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 import config
 from core.utils import callbackdata
 
-questions = {
-    "Вопрос 1": "Ответ на вопрос 1.",
-    "Вопрос 2": "Ответ на вопрос 2.",
-    "Вопрос 3": "Ответ на вопрос 3.",
-    # Добавьте остальные вопросы
-}
-
 def start_menu():
     builder = InlineKeyboardBuilder()
 
@@ -90,3 +83,10 @@ def get_manager():
     builder.button(text='🔙 Главное меню', callback_data='start_menu')
 
     return builder.adjust(1).as_markup()
+
+questions = {
+    "Вопрос 1": "Ответ на вопрос 1.",
+    "Вопрос 2": "Ответ на вопрос 2.",
+    "Вопрос 3": "Ответ на вопрос 3.",
+    # Добавьте остальные вопросы
+}
