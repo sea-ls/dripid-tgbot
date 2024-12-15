@@ -1,0 +1,44 @@
+name: Build and Deploy main
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - 'main'
+env:
+    CI_COMMIT_BRANCH: 'main'
+    CI_PROJECT_NAME: '${{ github.event.repository.name }}'
+    CI_REGISTRY: 'ghcr.io'
+    DOCKER_REPO_PASSWORD: '${{ secrets.DOCKER_REPO_PASSWORD }}'
+    DOCKER_REPO_URL: '${{ vars.DOCKER_REPO_URL }}'
+    DOCKER_REPO_URL_LOGIN: '${{ vars.DOCKER_REPO_URL_LOGIN }}'
+    DOCKER_REPO_USERNAME: '${{ secrets.DOCKER_REPO_USERNAME }}'
+    CONFIG_TOKEN: '${{ secrets.CONFIG_TOKEN }}'
+    ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+jobs:
+    build-image:
+        runs-on:
+            - self-hosted
+        steps:
+            - uses: 'actions/checkout@v3'
+            - run: 'echo $DOCKER_REPO_PASSWORD | docker login $DOCKER_REPO_URL_LOGIN -u $DOCKER_REPO_USERNAME --password-stdin'
+            - run: '[[ -n "${GITHUB_REF_NAME}" ]] && echo "IMAGE=dripid/tgbot:${GITHUB_REF_NAME}" >> $GITHUB_ENV || echo "IMAGE=dripid/tgbot:${GITHUB_HEAD_REF}-${GITHUB_BASE_REF}" >> $GITHUB_ENV'
+            - run: 'docker build -t $IMAGE .'
+            - run: 'docker tag dripid/tgbot:${GITHUB_REF_NAME} $DOCKER_REPO_URL$CI_PROJECT_NAME/tgbot:${GITHUB_REF_NAME}'
+            - run: 'docker push $DOCKER_REPO_URL$CI_PROJECT_NAME/tgbot:${GITHUB_REF_NAME}'
+    deploy-image:
+        runs-on:
+            - develop
+        needs:
+            - build-image
+        steps:
+            - uses: 'actions/checkout@v3'
+            - run: |
+                  pwd
+                  cd docker
+                  pwd
+                  echo $DOCKER_REPO_PASSWORD | docker login $DOCKER_REPO_URL_LOGIN -u $DOCKER_REPO_USERNAME --password-stdin
+                  echo $DOCKER_REPO_URL
+                  cat docker-compose.yaml-links.yml docker-compose.tgbot.yml > docker-compose.tgbot.gen.yml
+                  env $(cat ./env/$CI_COMMIT_BRANCH/.env | grep ^[A-Z] | xargs) docker --context $CI_COMMIT_BRANCH stack deploy -c docker-compose.tgbot.gen.yml --with-registry-auth dripid-tgbot
