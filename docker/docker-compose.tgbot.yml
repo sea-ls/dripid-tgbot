@@ -17,11 +17,12 @@ services:
         environment:
             BOT_TOKEN: tgbot-bot-token
             API_KEY: tgbot-api-key
-            TABLE_ID: tgbot-table_id
+            TABLE_ID: tgbot-table-id
         secrets:
             - tgbot-bot-token
             - tgbot-api-key
-            - tgbot-table_id
+            - tgbot-table-id
+            - tgbot-service.json
         logging:
             driver: 'json-file'
             options:
@@ -32,7 +33,9 @@ secrets:
         external: true
     tgbot-api-key:
         external: true
-    tgbot-table_id:
+    tgbot-table-id:
+        external: true
+    tgbot-service.json:
         external: true
 
 networks:
