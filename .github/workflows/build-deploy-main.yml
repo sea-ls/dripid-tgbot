@@ -6,7 +6,7 @@ on:
         branches:
             - 'main'
 env:
-    CI_COMMIT_BRANCH: 'main'
+    CI_COMMIT_BRANCH: 'develop'
     CI_PROJECT_NAME: '${{ github.event.repository.name }}'
     CI_REGISTRY: 'ghcr.io'
     DOCKER_REPO_PASSWORD: '${{ secrets.DOCKER_REPO_PASSWORD }}'
