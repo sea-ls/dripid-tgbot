@@ -41,4 +41,4 @@ jobs:
                   echo $DOCKER_REPO_PASSWORD | docker login $DOCKER_REPO_URL_LOGIN -u $DOCKER_REPO_USERNAME --password-stdin
                   echo $DOCKER_REPO_URL
                   cat docker-compose.yaml-links.yml docker-compose.tgbot.yml > docker-compose.tgbot.gen.yml
-                  env $(cat ./env/$CI_COMMIT_BRANCH/.env | grep ^[A-Z] | xargs) docker --context $CI_COMMIT_BRANCH stack deploy -c docker-compose.tgbot.gen.yml --with-registry-auth dripid-tgbot
+                  env $(cat ./env/main/.env | grep ^[A-Z] | xargs) docker --context $CI_COMMIT_BRANCH stack deploy -c docker-compose.tgbot.gen.yml --with-registry-auth dripid-tgbot
